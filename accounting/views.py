@@ -20,8 +20,10 @@ class UserSignUpAPIView(APIView):
         token_serializer.is_valid(raise_exception=True)
         res = {
             "token": token_serializer.validated_data.get("token"),
-            "full_name": user.first_name + " " + user.last_name,
-            "email": user.email,
-            "age": user.age
         }
         return Response(res, status=status.HTTP_201_CREATED)
+
+
+class GetUserDataAPIView(APIView):
+    def get(self, request):
+        return Response(UserSerializer(request.user).data, status=status.HTTP_200_OK)
