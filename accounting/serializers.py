@@ -2,9 +2,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 from accounting.models import CustomUser
+from classrooms.serializers import ClassroomBriefSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
+    joined_classes = ClassroomBriefSerializer(many=True, read_only=True)
+    owned_classes = ClassroomBriefSerializer(many=True, read_only=True)
+    created_classes = ClassroomBriefSerializer(many=True, read_only=True)
+
     class Meta:
         model = CustomUser
         fields = [
@@ -13,7 +18,10 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "age",
-            "password"
+            "password",
+            "created_classes",
+            "owned_classes",
+            "joined_classes"
         ]
 
         read_only_fields = ("id",)
