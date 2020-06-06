@@ -6,9 +6,9 @@ from classrooms.serializers import ClassroomBriefSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
-    joined_classes = ClassroomBriefSerializer(many=True, read_only=True)
-    owned_classes = ClassroomBriefSerializer(many=True, read_only=True)
-    created_classes = ClassroomBriefSerializer(many=True, read_only=True)
+    joined_classes = serializers.SerializerMethodField(read_only=True)
+    owned_classes = serializers.SerializerMethodField(read_only=True)
+    created_classes = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -27,6 +27,15 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
         extra_kwargs = {'password': {'write_only': True}}
 
+    def get_created_classes(self, obj):
+        return ClassroomBriefSerializer(obj.created_classes.filter(is_active=True), many=True).data
+
+    def get_owned_classes(self, obj):
+        return ClassroomBriefSerializer(obj.owned_classes.filter(is_active=True).exclude(creator=obj), many=True).data
+
+    def get_joined_classes(self, obj):
+        return ClassroomBriefSerializer(obj.joined_classes.filter(is_active=True), many=True).data
+
     def validate_age(self, value):
         if value <= 5:
             raise ValidationError("You are under aged for signing up")
@@ -35,3 +44,12 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data["username"] = validated_data.get("email")
         return CustomUser.objects.create_user(**validated_data)
+
+
+class UserEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            "first_name",
+            "last_name"
+        ]
