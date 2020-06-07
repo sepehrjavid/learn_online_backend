@@ -1,6 +1,8 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from classrooms.models import Classroom
+from accounting.serializers import UserBriefSerializer
 
 
 class ClassroomBriefSerializer(serializers.ModelSerializer):
@@ -12,8 +14,64 @@ class ClassroomBriefSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "creator",
+            "description",
             "is_online"
         ]
 
     def get_creator(self, obj):
-        return {"id": obj.creator.id, "name": obj.creator.first_name + " " + obj.creator.last_name}
+        return UserBriefSerializer(obj.creator).data
+
+
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = [
+            "id",
+            "name",
+            "description",
+            "creator",
+            "other_owners",
+            "enrolled"
+        ]
+
+        read_only_fields = ("id", "creator", "enrolled")
+
+    def validate_other_owners(self, value):
+        request = self.context.get("request")
+
+        for user in value:
+            if request.user == user:
+                raise ValidationError("Can't have yourself as other owners")
+
+        return value
+
+
+class ClassroomEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = [
+            "id",
+            "name",
+            "description",
+        ]
+
+
+class ClassroomRetrieveSerializer(serializers.ModelSerializer):
+    creator = serializers.SerializerMethodField()
+    other_owners = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Classroom
+        fields = [
+            "id",
+            "name",
+            "description",
+            "creator",
+            "other_owners",
+        ]
+
+    def get_creator(self, obj):
+        return UserBriefSerializer(obj.creator).data
+
+    def get_other_owners(self, obj):
+        return UserBriefSerializer(obj.other_owners, many=True).data

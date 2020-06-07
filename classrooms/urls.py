@@ -1,9 +1,12 @@
 from django.urls import path, re_path
 
-from classrooms.views import DeactivateClassAPIView
+from classrooms.views import DeactivateClassAPIView, CreateClassAPIView, UpdateClassAPIView, RetrieveClassAPIView
 
 app_name = "classrooms"
 
 urlpatterns = [
-    re_path(r'^deactivate/(?P<pk>\d+)$', DeactivateClassAPIView.as_view())
+    path('create', CreateClassAPIView.as_view()),
+    re_path(r'^edit/(?P<pk>\d+)$', UpdateClassAPIView.as_view()),
+    re_path(r'^retrieve/(?P<pk>\d+)$', RetrieveClassAPIView.as_view()),
+    re_path(r'^deactivate/(?P<pk>\d+)$', DeactivateClassAPIView.as_view()),
 ]

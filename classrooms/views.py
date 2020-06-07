@@ -1,9 +1,33 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from classrooms.models import Classroom
+from classrooms.permissions import ClassroomIsOwnerPermission
+from classrooms.serializers import ClassroomSerializer, ClassroomEditSerializer, ClassroomRetrieveSerializer
+
+
+class RetrieveClassAPIView(RetrieveAPIView):
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomRetrieveSerializer
+
+
+class UpdateClassAPIView(UpdateAPIView):
+    queryset = Classroom.objects.all()
+    permission_classes = [ClassroomIsOwnerPermission]
+    serializer_class = ClassroomEditSerializer
+
+
+class CreateClassAPIView(CreateAPIView):
+    queryset = Classroom.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = ClassroomSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
 
 
 class DeactivateClassAPIView(APIView):

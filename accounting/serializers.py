@@ -2,6 +2,22 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 from accounting.models import CustomUser
+
+
+class UserBriefSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "name"
+        ]
+
+    def get_name(self, obj):
+        return obj.first_name + " " + obj.last_name
+
+
 from classrooms.serializers import ClassroomBriefSerializer
 
 
@@ -31,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
         return ClassroomBriefSerializer(obj.created_classes.filter(is_active=True), many=True).data
 
     def get_owned_classes(self, obj):
-        return ClassroomBriefSerializer(obj.owned_classes.filter(is_active=True).exclude(creator=obj), many=True).data
+        return ClassroomBriefSerializer(obj.owned_classes.filter(is_active=True), many=True).data
 
     def get_joined_classes(self, obj):
         return ClassroomBriefSerializer(obj.joined_classes.filter(is_active=True), many=True).data
