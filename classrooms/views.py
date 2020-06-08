@@ -1,13 +1,21 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from classrooms.models import Classroom
 from classrooms.permissions import ClassroomIsOwnerPermission
-from classrooms.serializers import ClassroomSerializer, ClassroomEditSerializer, ClassroomRetrieveSerializer
+from classrooms.serializers import ClassroomSerializer, ClassroomEditSerializer, ClassroomRetrieveSerializer, \
+    ClassroomBriefSerializer
+
+
+class ListClassAPIView(ListAPIView):
+    queryset = Classroom.objects.filter(is_active=True)
+    serializer_class = ClassroomBriefSerializer
+
+    # TODO add search fro listing
 
 
 class RetrieveClassAPIView(RetrieveAPIView):
