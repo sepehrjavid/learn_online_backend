@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
@@ -15,7 +16,15 @@ class ListClassAPIView(ListAPIView):
     queryset = Classroom.objects.filter(is_active=True)
     serializer_class = ClassroomBriefSerializer
 
-    # TODO add search fro listing
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        qs = Classroom.objects.filter(is_active=True)
+        if query:
+            qs = qs.filter(Q(name__icontains=query) |
+                           Q(description__icontains=query) |
+                           Q(creator__first_name__contains=query) |
+                           Q(creator__last_name__contains=query))
+        return qs
 
 
 class RetrieveClassAPIView(RetrieveAPIView):
