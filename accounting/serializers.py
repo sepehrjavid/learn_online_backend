@@ -69,3 +69,12 @@ class UserEditSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name"
         ]
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "email"
+        ]

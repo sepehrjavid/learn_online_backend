@@ -1,12 +1,12 @@
 from rest_framework import status
-from rest_framework.generics import UpdateAPIView
+from rest_framework.generics import UpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
 from accounting.models import CustomUser
-from accounting.serializers import UserSerializer, UserEditSerializer
+from accounting.serializers import UserSerializer, UserEditSerializer, UserListSerializer
 
 
 class UserSignUpAPIView(APIView):
@@ -40,3 +40,14 @@ class EditUserAPIView(UpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class GetUserListAPIView(ListAPIView):
+    serializer_class = UserListSerializer
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        qs = CustomUser.objects.all()
+        if query:
+            qs = qs.filter(email__icontains=query)
+        return qs
