@@ -11,5 +11,5 @@ urlpatterns = [
     path('signup', UserSignUpAPIView.as_view()),
     path('get_user_info', GetUserDataAPIView.as_view()),
     path('edit', EditUserAPIView.as_view()),
-    path('user_list', GetUserListAPIView)
+    path('user_list', GetUserListAPIView.as_view())
 ]

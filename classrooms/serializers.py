@@ -23,6 +23,8 @@ class ClassroomBriefSerializer(serializers.ModelSerializer):
 
 
 class ClassroomSerializer(serializers.ModelSerializer):
+    creator = serializers.SerializerMethodField()
+
     class Meta:
         model = Classroom
         fields = [
@@ -35,6 +37,9 @@ class ClassroomSerializer(serializers.ModelSerializer):
         ]
 
         read_only_fields = ("id", "creator", "enrolled")
+
+    def get_creator(self, obj):
+        return UserBriefSerializer(obj.creator).data
 
     def validate_other_owners(self, value):
         request = self.context.get("request")
