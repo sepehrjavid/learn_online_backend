@@ -78,3 +78,14 @@ class UserListSerializer(serializers.ModelSerializer):
             "id",
             "email"
         ]
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(max_length=150)
+    new_password = serializers.CharField(max_length=150)
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass

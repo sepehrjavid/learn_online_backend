@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
 from accounting.models import CustomUser
-from accounting.serializers import UserSerializer, UserEditSerializer, UserListSerializer
+from accounting.serializers import UserSerializer, UserEditSerializer, UserListSerializer, ChangePasswordSerializer
 
 
 class UserSignUpAPIView(APIView):
@@ -51,3 +51,19 @@ class GetUserListAPIView(ListAPIView):
         if query:
             qs = qs.filter(email__icontains=query)
         return qs
+
+
+class ChangePasswordAPIView(APIView):
+    serializer_class = ChangePasswordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if user.check_password(serializer.validated_data.get("current_password")):
+            user.set_password(serializer.validated_data.get("new_password"))
+            user.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response("Incorrect password", status=status.HTTP_401_UNAUTHORIZED)
