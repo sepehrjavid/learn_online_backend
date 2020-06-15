@@ -11,7 +11,8 @@ class UserBriefSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = [
             "id",
-            "name"
+            "name",
+            "email"
         ]
 
     def get_name(self, obj):
@@ -68,15 +69,6 @@ class UserEditSerializer(serializers.ModelSerializer):
         fields = [
             "first_name",
             "last_name"
-        ]
-
-
-class UserListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = [
-            "id",
-            "email"
         ]
 
 

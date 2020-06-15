@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
 
 from accounting.models import CustomUser
-from accounting.serializers import UserSerializer, UserEditSerializer, UserListSerializer, ChangePasswordSerializer
+from accounting.serializers import UserSerializer, UserEditSerializer, ChangePasswordSerializer, UserBriefSerializer
 
 
 class UserSignUpAPIView(APIView):
@@ -43,7 +43,7 @@ class EditUserAPIView(UpdateAPIView):
 
 
 class GetUserListAPIView(ListAPIView):
-    serializer_class = UserListSerializer
+    serializer_class = UserBriefSerializer
 
     def get_queryset(self):
         query = self.request.GET.get("q")

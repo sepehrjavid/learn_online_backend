@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 
 from classrooms.models import Classroom
 from classrooms.permissions import ClassroomIsOwnerPermission
-from classrooms.serializers import ClassroomSerializer, ClassroomEditSerializer, ClassroomRetrieveSerializer, \
-    ClassroomBriefSerializer, AddOwnerToClassSerializer
+from classrooms.serializers import (ClassroomSerializer, ClassroomEditSerializer, ClassroomBriefSerializer,
+                                    AddOwnerToClassSerializer)
 
 
 class ListClassAPIView(ListAPIView):
@@ -29,7 +29,7 @@ class ListClassAPIView(ListAPIView):
 
 class RetrieveClassAPIView(RetrieveAPIView):
     queryset = Classroom.objects.all()
-    serializer_class = ClassroomRetrieveSerializer
+    serializer_class = ClassroomBriefSerializer
 
 
 class UpdateClassAPIView(UpdateAPIView):
@@ -69,7 +69,7 @@ class AddOwnerToClassAPIView(APIView):
             return Response({
                 "detail": "You do not have permission to perform this action."
             }, status=status.HTTP_403_FORBIDDEN)
-        ser = self.serializer_class(data=request.data)
+        ser = self.serializer_class(data=request.data, context={"request": self.request})
         ser.is_valid(raise_exception=True)
         classroom.other_owners.set(ser.validated_data.get("owners"))
         return Response(status=status.HTTP_204_NO_CONTENT)
