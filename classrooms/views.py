@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from classrooms.models import Classroom
 from classrooms.permissions import ClassroomIsOwnerPermission
-from classrooms.serializers import (ClassroomSerializer, ClassroomEditSerializer, ClassroomBriefSerializer,
+from classrooms.serializers import (ClassroomCreateSerializer, ClassroomEditSerializer, ClassroomBriefSerializer,
                                     AddOwnerToClassSerializer)
 
 
@@ -41,7 +41,7 @@ class UpdateClassAPIView(UpdateAPIView):
 class CreateClassAPIView(CreateAPIView):
     queryset = Classroom.objects.all()
     permission_classes = [IsAuthenticated]
-    serializer_class = ClassroomSerializer
+    serializer_class = ClassroomCreateSerializer
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
@@ -72,4 +72,4 @@ class AddOwnerToClassAPIView(APIView):
         ser = self.serializer_class(data=request.data, context={"request": self.request})
         ser.is_valid(raise_exception=True)
         classroom.other_owners.set(ser.validated_data.get("owners"))
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)

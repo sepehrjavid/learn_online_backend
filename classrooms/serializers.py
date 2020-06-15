@@ -28,8 +28,9 @@ class ClassroomBriefSerializer(serializers.ModelSerializer):
         return UserBriefSerializer(obj.other_owners, many=True).data
 
 
-class ClassroomSerializer(serializers.ModelSerializer):
+class ClassroomCreateSerializer(serializers.ModelSerializer):
     creator = serializers.SerializerMethodField()
+    other_owners_data = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Classroom
@@ -39,13 +40,18 @@ class ClassroomSerializer(serializers.ModelSerializer):
             "description",
             "creator",
             "other_owners",
+            "other_owners_data",
             "enrolled"
         ]
 
         read_only_fields = ("id", "creator", "enrolled")
+        extra_kwargs = {"other_owners_data": {"write_only": True}}
 
     def get_creator(self, obj):
         return UserBriefSerializer(obj.creator).data
+
+    def get_other_owners_data(self, obj):
+        return UserBriefSerializer(obj.other_owners, many=True).data
 
     def validate_other_owners(self, value):
         request = self.context.get("request")

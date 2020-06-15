@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.generics import UpdateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -49,7 +50,7 @@ class GetUserListAPIView(ListAPIView):
         query = self.request.GET.get("q")
         qs = CustomUser.objects.all()
         if query:
-            qs = qs.filter(email__icontains=query)
+            qs = qs.filter(Q(email__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query))
         return qs
 
 
