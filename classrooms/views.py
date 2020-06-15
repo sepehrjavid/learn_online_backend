@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from classrooms.models import Classroom
 from classrooms.permissions import ClassroomIsOwnerPermission
 from classrooms.serializers import ClassroomSerializer, ClassroomEditSerializer, ClassroomRetrieveSerializer, \
-    ClassroomBriefSerializer
+    ClassroomBriefSerializer, AddOwnerToClassSerializer
 
 
 class ListClassAPIView(ListAPIView):
@@ -56,4 +56,20 @@ class DeactivateClassAPIView(APIView):
             }, status=status.HTTP_403_FORBIDDEN)
         classroom.is_active = False
         classroom.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AddOwnerToClassAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddOwnerToClassSerializer
+
+    def put(self, request, pk):
+        classroom = get_object_or_404(Classroom, id=pk)
+        if classroom.creator != request.user:
+            return Response({
+                "detail": "You do not have permission to perform this action."
+            }, status=status.HTTP_403_FORBIDDEN)
+        ser = self.serializer_class(data=request.data)
+        ser.is_valid(raise_exception=True)
+        classroom.other_owners.set(ser.validated_data.get("owners"))
         return Response(status=status.HTTP_204_NO_CONTENT)

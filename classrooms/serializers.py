@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from accounting.models import CustomUser
 from classrooms.models import Classroom
 from accounting.serializers import UserBriefSerializer
 
@@ -80,3 +81,13 @@ class ClassroomRetrieveSerializer(serializers.ModelSerializer):
 
     def get_other_owners(self, obj):
         return UserBriefSerializer(obj.other_owners, many=True).data
+
+
+class AddOwnerToClassSerializer(serializers.Serializer):
+    owners = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
