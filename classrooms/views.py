@@ -73,3 +73,14 @@ class AddOwnerToClassAPIView(APIView):
         ser.is_valid(raise_exception=True)
         classroom.other_owners.set(ser.validated_data.get("owners"))
         return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)
+
+
+class ToggleEnrollClassAPIView(APIView):
+    def get(self, request, pk):
+        classroom = get_object_or_404(Classroom, id=pk)
+        if request.user in classroom.enrolled.all():
+            classroom.enrolled.remove(request.user)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            classroom.enrolled.add(request.user)
+            return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)
