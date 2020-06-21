@@ -7,8 +7,8 @@ from accounting.serializers import UserBriefSerializer
 
 
 class ClassroomBriefSerializer(serializers.ModelSerializer):
-    creator = serializers.SerializerMethodField()
-    other_owners = serializers.SerializerMethodField()
+    creator = UserBriefSerializer()
+    other_owners = UserBriefSerializer(many=True)
 
     class Meta:
         model = Classroom
@@ -20,12 +20,6 @@ class ClassroomBriefSerializer(serializers.ModelSerializer):
             "other_owners",
             "is_online"
         ]
-
-    def get_creator(self, obj):
-        return UserBriefSerializer(obj.creator).data
-
-    def get_other_owners(self, obj):
-        return UserBriefSerializer(obj.other_owners, many=True).data
 
 
 class ClassroomCreateSerializer(serializers.ModelSerializer):
@@ -74,7 +68,7 @@ class ClassroomEditSerializer(serializers.ModelSerializer):
 
 
 class AddOwnerToClassSerializer(serializers.Serializer):
-    owners = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
+    other_owners = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), many=True)
 
     def update(self, instance, validated_data):
         pass
@@ -82,7 +76,7 @@ class AddOwnerToClassSerializer(serializers.Serializer):
     def create(self, validated_data):
         pass
 
-    def validate_owners(self, value):
+    def validate_other_owners(self, value):
         request = self.context.get("request")
 
         for user in value:

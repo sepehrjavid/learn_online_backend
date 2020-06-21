@@ -1,7 +1,8 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView, ListAPIView, DestroyAPIView, \
+    GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -47,31 +48,27 @@ class CreateClassAPIView(CreateAPIView):
         serializer.save(creator=self.request.user)
 
 
-class DeactivateClassAPIView(APIView):
-    def delete(self, request, pk):
-        classroom = get_object_or_404(Classroom, id=pk)
-        if classroom.creator != request.user:
-            return Response({
-                "detail": "You do not have permission to perform this action."
-            }, status=status.HTTP_403_FORBIDDEN)
+class DeactivateClassAPIView(DestroyAPIView):
+    queryset = Classroom.objects.all()
+    permission_classes = [IsClassroomCreatorPermission]
+
+    def delete(self, request, *args, **kwargs):
+        classroom = self.get_object()
         classroom.is_active = False
         classroom.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AddOwnerToClassAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+class AddOwnerToClassAPIView(GenericAPIView):
+    permission_classes = [IsClassroomCreatorPermission]
     serializer_class = AddOwnerToClassSerializer
+    queryset = Classroom.objects.all()
 
     def put(self, request, pk):
-        classroom = get_object_or_404(Classroom, id=pk)
-        if classroom.creator != request.user:
-            return Response({
-                "detail": "You do not have permission to perform this action."
-            }, status=status.HTTP_403_FORBIDDEN)
+        classroom = self.get_object()
         ser = self.serializer_class(data=request.data, context={"request": self.request})
         ser.is_valid(raise_exception=True)
-        classroom.other_owners.set(ser.validated_data.get("owners"))
+        classroom.other_owners.set(ser.validated_data.get("other_owners"))
         return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)
 
 
