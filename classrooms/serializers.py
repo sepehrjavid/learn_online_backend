@@ -88,5 +88,4 @@ class AddOwnerToClassSerializer(serializers.Serializer):
         for user in value:
             if request.user == user:
                 raise ValidationError("Can't have yourself as other owners")
-
         return value

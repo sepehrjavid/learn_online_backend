@@ -82,5 +82,7 @@ class ToggleEnrollClassAPIView(APIView):
             classroom.enrolled.remove(request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
         else:
+            if request.user == classroom.creator or request.user in classroom.other_owners.all():
+                return Response("Creator or Owner of a class cannot enroll")
             classroom.enrolled.add(request.user)
             return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)
