@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from classrooms.models import Classroom
-from classrooms.permissions import ClassroomIsOwnerPermission
+from classrooms.permissions import IsClassroomCreatorPermission
 from classrooms.serializers import (ClassroomCreateSerializer, ClassroomEditSerializer, ClassroomBriefSerializer,
                                     AddOwnerToClassSerializer)
 
@@ -34,7 +34,7 @@ class RetrieveClassAPIView(RetrieveAPIView):
 
 class UpdateClassAPIView(UpdateAPIView):
     queryset = Classroom.objects.all()
-    permission_classes = [ClassroomIsOwnerPermission]
+    permission_classes = [IsClassroomCreatorPermission]
     serializer_class = ClassroomEditSerializer
 
 
