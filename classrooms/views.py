@@ -89,7 +89,7 @@ class QuitClassOwnershipAPIView(GenericAPIView):
     permission_classes = [IsClassroomOwnerPermission]
     queryset = Classroom.objects.all()
 
-    def delete(self, request):
+    def delete(self, request, pk):
         classroom = self.get_object()
         classroom.other_owners.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
