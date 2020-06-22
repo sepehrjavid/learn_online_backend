@@ -28,10 +28,6 @@ class ListClassAPIView(ListAPIView):
         return qs
 
 
-class RetrieveClassAPIView(RetrieveAPIView):
-    queryset = Classroom.objects.all()
-    serializer_class = ClassroomBriefSerializer
-
 
 class UpdateClassAPIView(UpdateAPIView):
     queryset = Classroom.objects.all()
