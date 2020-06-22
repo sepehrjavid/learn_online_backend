@@ -4,22 +4,41 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from accounting.serializers import UserBriefSerializer
 from learn_online_backend.settings import QUESTION_TYPES, MULTIPLE_CHOICE, TRUE_OR_FALSE, DESCRIPTIVE
 from quizzes.models import Quiz, QuizAnswer
 
 
+class QuizAnswerBriefSerializer(serializers.ModelSerializer):
+    user = UserBriefSerializer()
+
+    class Meta:
+        model = QuizAnswer
+        fields = [
+            "id",
+            "user",
+            "sent_date",
+            "score",
+            "answers",
+        ]
+
+
 class QuizSerializer(serializers.ModelSerializer):
+    answers = QuizAnswerBriefSerializer(read_only=True, many=True)
+
     class Meta:
         model = Quiz
         fields = [
             "id",
+            "name",
             "created_date",
+            "answers",
             "deadline",
             "start_date",
             "questions"
         ]
 
-        read_only_fields = ("id",)
+        read_only_fields = ("id", "created_date")
 
     def validate_questions(self, questions):
         if len(questions) == 0:
@@ -35,6 +54,8 @@ class QuizSerializer(serializers.ModelSerializer):
             if QUESTION_TYPES[question.get("type")] == MULTIPLE_CHOICE:
                 if 'choices' not in keys:
                     raise ValidationError("Choices of multiple choice question are not included")
+                if type(question.get("choices")) != list:
+                    raise ValidationError("Invalid structure for choices")
                 for choice in question.get("choices"):
                     if type(choice) != str:
                         raise ValidationError("Choices must be string")
@@ -49,8 +70,20 @@ class QuizSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class QuizBriefSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quiz
+        fields = [
+            "id",
+            "name",
+            "deadline",
+            "start_date",
+            "questions"
+        ]
+
+
 class QuizAnswerSerializer(serializers.ModelSerializer):
-    quiz = QuizSerializer(read_only=True)
+    quiz = QuizBriefSerializer(read_only=True)
 
     class Meta:
         model = QuizAnswer
@@ -63,9 +96,17 @@ class QuizAnswerSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ("id", "score", "sent_date")
 
+    def validate(self, attrs):
+        user = self.context.get("request").user
+        quiz_id = self.context.get("view").kwargs.get("pk")
+        qs = QuizAnswer.objects.filter(user=user, quiz_id=quiz_id)
+        if qs.exists():
+            raise ValidationError("You already have answered this quiz")
+        return attrs
+
     def validate_answers(self, answers):
-        question_id = self.context.get("view").kwargs.get("pk")
-        questions = get_object_or_404(Quiz, id=question_id).questions
+        quiz_id = self.context.get("view").kwargs.get("pk")
+        questions = get_object_or_404(Quiz, id=quiz_id).questions
         if len(answers) != len(questions):
             raise ValidationError("number of Answers is not equal to number of questions")
         for i in range(len(answers)):

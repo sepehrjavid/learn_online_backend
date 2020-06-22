@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from classrooms.models import Classroom
-from classrooms.permissions import IsClassroomCreatorPermission
+from classrooms.permissions import IsClassroomCreatorPermission, IsClassroomOwnerPermission
 from classrooms.serializers import (ClassroomCreateSerializer, ClassroomEditSerializer, ClassroomBriefSerializer,
                                     AddOwnerToClassSerializer)
 
@@ -83,3 +83,13 @@ class ToggleEnrollClassAPIView(APIView):
                 return Response("Creator or Owner of a class cannot enroll")
             classroom.enrolled.add(request.user)
             return Response(ClassroomBriefSerializer(classroom).data, status=status.HTTP_200_OK)
+
+
+class QuitClassOwnershipAPIView(GenericAPIView):
+    permission_classes = [IsClassroomOwnerPermission]
+    queryset = Classroom.objects.all()
+
+    def delete(self, request):
+        classroom = self.get_object()
+        classroom.other_owners.remove(request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
