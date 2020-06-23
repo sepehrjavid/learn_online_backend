@@ -115,7 +115,7 @@ class QuizAnswerSerializer(serializers.ModelSerializer):
                     raise ValidationError("Invalid choice answer")
                 if type(answers[i]) != str:
                     raise ValidationError("Choice answer must be string")
-            if questions[i]["type"] == TRUE_OR_FALSE and type(answers[i]) != bool:
+            if questions[i]["type"] == TRUE_OR_FALSE and type(answers[i]) != bool and answers[i] is not None:
                 raise ValidationError("True or false answer should be boolean")
             if questions[i]["type"] == DESCRIPTIVE and type(answers[i]) != str:
                 raise ValidationError("Descriptive answer must be string")
