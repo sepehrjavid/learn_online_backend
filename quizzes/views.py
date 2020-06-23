@@ -12,9 +12,12 @@ from quizzes.serializers import QuizSerializer, QuizAnswerSerializer, QuizBriefS
 
 class GetClassQuizzesAPIView(ListAPIView):
     serializer_class = QuizSerializer
+    permission_classes = [IsClassroomCreatorPermission | IsClassroomOwnerPermission]
 
     def get_queryset(self):
-        return Quiz.objects.filter(classroom__id=self.kwargs.get("pk"))
+        classroom = get_object_or_404(Classroom, id=self.kwargs.get("pk"))
+        self.check_object_permissions(self.request, classroom)
+        return Quiz.objects.filter(classroom=classroom)
 
 
 class GetQuizOwnAnswersAPIView(GenericAPIView):

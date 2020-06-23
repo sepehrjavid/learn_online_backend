@@ -11,3 +11,6 @@ class Classroom(models.Model):
     enrolled = models.ManyToManyField(CustomUser, related_name="joined_classes", blank=True)
     is_active = models.BooleanField(default=True)
     is_online = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name + ": " + str(self.id)
