@@ -63,6 +63,7 @@ class QuizSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         now = datetime.datetime.now()
+        now = now.replace(tzinfo=datetime.timezone.utc)
         if now > attrs.get("start_date"):
             raise ValidationError("Start date cannot be before current time")
         if attrs.get("start_date") >= attrs.get("deadline"):
@@ -102,6 +103,9 @@ class QuizAnswerSerializer(serializers.ModelSerializer):
         qs = QuizAnswer.objects.filter(user=user, quiz_id=quiz_id)
         if qs.exists():
             raise ValidationError("You already have answered this quiz")
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+        if quiz.start_date > datetime.datetime.now().replace(tzinfo=datetime.timezone.utc):
+            raise ValidationError("Quiz has not started yet")
         return attrs
 
     def validate_answers(self, answers):
