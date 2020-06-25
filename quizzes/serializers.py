@@ -125,3 +125,13 @@ class QuizAnswerSerializer(serializers.ModelSerializer):
                 raise ValidationError("Descriptive answer must be string")
 
         return answers
+
+
+class ScoreQuizAnswerSerializer(serializers.Serializer):
+    score = serializers.IntegerField()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
