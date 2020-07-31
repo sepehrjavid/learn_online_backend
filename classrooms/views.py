@@ -28,7 +28,6 @@ class ListClassAPIView(ListAPIView):
         return qs
 
 
-
 class UpdateClassAPIView(UpdateAPIView):
     queryset = Classroom.objects.all()
     permission_classes = [IsClassroomCreatorPermission]
